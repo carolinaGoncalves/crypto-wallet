@@ -34,7 +34,7 @@ public class CoinCapClient {
     }
 
 
-    public BigDecimal getAssetPriceByName(String symbol){
+    public BigDecimal getAssetPriceBySymbol(String symbol){
 
         PriceSymbol response = restClient.get()
                 .uri("/price/bysymbol/{symbol}", symbol)

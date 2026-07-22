@@ -26,15 +26,15 @@ public class PriceService {
     }
 
     public void getAndInsertPrices(String symbol){
-        BigDecimal value = coinCapClient.getAssetPriceByName(symbol);
+        BigDecimal value = coinCapClient.getAssetPriceBySymbol(symbol);
 
         if(Objects.isNull(value)){
             log.info("Price for asset {} is null. It will be ignored.", symbol);
             return;
         }
 
-        PriceHistory record = new PriceHistory(symbol, value, LocalDateTime.now());
-        priceHistoryRepository.save(record);
+        PriceHistory priceHistory = new PriceHistory(symbol, value, LocalDateTime.now());
+        priceHistoryRepository.save(priceHistory);
 
     }
 }

@@ -27,21 +27,9 @@ public class PriceHistory {
     @Column(nullable = false)
     private LocalDateTime retrievedDate;
 
-    public PriceHistory(String symbol, BigDecimal price, LocalDateTime retrievedDate){
-        this.symbol=symbol;
-        this.price=price;
-        this.retrievedDate=retrievedDate;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        PriceHistory that = (PriceHistory) o;
-        return Objects.equals(symbol, that.symbol) && Objects.equals(price, that.price) && Objects.equals(retrievedDate, that.retrievedDate);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(symbol, price, retrievedDate);
+    public PriceHistory(String symbol, BigDecimal price, LocalDateTime retrievedDate) {
+        this.symbol = symbol;
+        this.price = price;
+        this.retrievedDate = retrievedDate;
     }
 }
