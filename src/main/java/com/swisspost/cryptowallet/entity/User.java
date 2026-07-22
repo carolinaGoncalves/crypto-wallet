@@ -1,14 +1,11 @@
 package com.swisspost.cryptowallet.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 @Entity
@@ -29,6 +26,11 @@ public class User {
     private String fullName;
 
     @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
+    public User(String username, String fullName, LocalDateTime createdAt){
+        this.username=username;
+        this.fullName=fullName;
+        this.createdAt=createdAt;
+    }
 }

@@ -1,0 +1,58 @@
+package com.swisspost.cryptowallet.service;
+
+import com.swisspost.cryptowallet.dto.UserRequest;
+import com.swisspost.cryptowallet.dto.UserResponse;
+import com.swisspost.cryptowallet.entity.User;
+import com.swisspost.cryptowallet.exception.UserNotFoundException;
+import com.swisspost.cryptowallet.repository.UserRepository;
+import jakarta.validation.Valid;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
+
+@Service
+public class UserService {
+
+    private final UserRepository userRepository;
+
+    public UserService(UserRepository userRepository){
+        this.userRepository = userRepository;
+    }
+
+    private UserResponse mapUserToUserDto(User user) {
+        return new UserResponse(
+                user.getUsername(),
+                user.getFullName(),
+                user.getCreatedAt()
+        );
+    }
+
+    public UserResponse createUser(@Valid UserRequest userRequest) {
+        User user = mapUserDtoToUser(userRequest);
+        user.setCreatedAt(LocalDateTime.now());
+
+        User saved = userRepository.save(user);
+        return mapUserToUserDto(saved);
+    }
+
+    private User mapUserDtoToUser(UserRequest user) {
+        return new User(
+                user.getUsername(),
+                user.getFullName(),
+                LocalDateTime.now()
+        );
+    }
+
+
+    public UserResponse findUserByUsername(String username){
+       Optional<User> user =  userRepository.findByUsername(username);
+
+        if(user.isPresent()){
+            return mapUserToUserDto(user.get());
+        }
+
+        throw new UserNotFoundException(username);
+    }
+
+}
