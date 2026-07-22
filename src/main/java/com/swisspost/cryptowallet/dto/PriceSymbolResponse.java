@@ -7,7 +7,7 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class PriceSymbol {
+public class PriceSymbolResponse {
 
     private final long timestamp;
     private final List<String> data;

@@ -1,6 +1,6 @@
 package com.swisspost.cryptowallet.client;
 
-import com.swisspost.cryptowallet.dto.PriceSymbol;
+import com.swisspost.cryptowallet.dto.PriceSymbolResponse;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,10 +36,10 @@ public class CoinCapClient {
 
     public BigDecimal getAssetPriceBySymbol(String symbol){
 
-        PriceSymbol response = restClient.get()
+        PriceSymbolResponse response = restClient.get()
                 .uri("/price/bysymbol/{symbol}", symbol)
                 .retrieve()
-                .body(PriceSymbol.class);
+                .body(PriceSymbolResponse.class);
 
         if (response == null || response.getData() == null || response.getData().isEmpty()
                 || response.getData().get(0) == null) {
