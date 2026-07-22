@@ -19,16 +19,15 @@ public class PriceHistoryScheduling {
     private final PriceService priceService;
     private final WalletRepository walletRepository;
 
-    @Value("${schedule.price.thread.pool.size}")
-    private int threadPoolSize;
-
-    private ExecutorService executorService;
+    private final ExecutorService executorService;
 
     private static final Logger log = LoggerFactory.getLogger(PriceHistoryScheduling.class);
 
-    public PriceHistoryScheduling(PriceService priceService, WalletRepository walletRepository){
+    public PriceHistoryScheduling(PriceService priceService, WalletRepository walletRepository,
+                                  @Value("${schedule.price.thread.pool.size}") int threadPoolSize) {
         this.priceService = priceService;
         this.walletRepository = walletRepository;
+        this.executorService = Executors.newFixedThreadPool(threadPoolSize);
     }
 
     @Scheduled(cron = "${scheduler.price.cron}")
@@ -39,8 +38,6 @@ public class PriceHistoryScheduling {
             log.info("No wallets available yet");
             return;
         }
-
-        executorService = Executors.newFixedThreadPool(threadPoolSize);
 
         for (String symbol : distinctSymbols) {
             executorService.submit(() -> {
