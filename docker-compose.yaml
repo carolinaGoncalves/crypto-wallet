@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: cryptowallet-db
+    environment:
+      POSTGRES_DB: cryptowallet
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - cryptowallet-data:/var/lib/postgresql/data
+
+volumes:
+  cryptowallet-data:
