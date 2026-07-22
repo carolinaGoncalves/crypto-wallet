@@ -43,7 +43,6 @@ public class PriceHistoryScheduling {
             executorService.submit(() -> {
                 try {
                     priceService.getAndInsertPrices(symbol);
-                    log.info("Insert price for {}", symbol);
                 } catch (Exception e) {
                     log.error("Failed to insert price for {}: {}", symbol, e.getMessage());
                 }

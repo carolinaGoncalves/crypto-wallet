@@ -35,6 +35,7 @@ public class PriceService {
 
         PriceHistory priceHistory = new PriceHistory(symbol, value, LocalDateTime.now());
         priceHistoryRepository.save(priceHistory);
+        log.info("Inserted {} with value {} ", symbol, value);
 
     }
 }
