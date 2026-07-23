@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static com.swisspost.cryptowallet.dto.UserResponse.mapUserDtoToUser;
+import static com.swisspost.cryptowallet.dto.UserResponse.mapUserToUserDto;
+
 @Service
 public class UserService {
 
@@ -20,13 +23,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    private UserResponse mapUserToUserDto(User user) {
-        return new UserResponse(
-                user.getUsername(),
-                user.getFullName(),
-                user.getCreatedAt()
-        );
-    }
+
 
     public UserResponse createUser(@Valid UserRequest userRequest) {
         User user = mapUserDtoToUser(userRequest);
@@ -34,14 +31,6 @@ public class UserService {
 
         User saved = userRepository.save(user);
         return mapUserToUserDto(saved);
-    }
-
-    private User mapUserDtoToUser(UserRequest user) {
-        return new User(
-                user.getUsername(),
-                user.getFullName(),
-                LocalDateTime.now()
-        );
     }
 
 
