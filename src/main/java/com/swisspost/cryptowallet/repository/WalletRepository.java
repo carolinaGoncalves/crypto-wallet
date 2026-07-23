@@ -10,6 +10,5 @@ import java.util.UUID;
 
 public interface WalletRepository extends JpaRepository<Wallet, UUID> {
 
-    @Query("SELECT DISTINCT wallet.symbol FROM Wallet wallet")
-    List<String> findDistinctSymbols();
+
 }
