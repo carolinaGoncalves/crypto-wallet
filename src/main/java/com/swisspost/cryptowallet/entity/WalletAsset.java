@@ -1,6 +1,10 @@
 package com.swisspost.cryptowallet.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -8,6 +12,9 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "wallet_assets")
+@Getter
+@Setter
+@NoArgsConstructor
 public class WalletAsset {
     @Id
     @GeneratedValue
@@ -28,4 +35,11 @@ public class WalletAsset {
 
     @Column(nullable = false)
     private LocalDateTime purchaseDate;
+
+    public WalletAsset(String symbol, BigDecimal quantity, BigDecimal purchasePrice, LocalDateTime purchaseDate) {
+        this.symbol=symbol;
+        this.quantity=quantity;
+        this.purchasePrice=purchasePrice;
+        this.purchaseDate=purchaseDate;
+    }
 }

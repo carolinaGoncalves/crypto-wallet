@@ -26,4 +26,8 @@ public class Wallet {
     @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<WalletAsset> assets = new ArrayList<>();
 
+    public Wallet(User user){
+        this.user=user;
+    }
+
 }
