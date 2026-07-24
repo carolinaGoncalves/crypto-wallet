@@ -1,9 +1,6 @@
 package com.swisspost.cryptowallet.service;
 
-import com.swisspost.cryptowallet.dto.WalletAssetRequest;
-import com.swisspost.cryptowallet.dto.WalletAssetResponse;
-import com.swisspost.cryptowallet.dto.WalletRequest;
-import com.swisspost.cryptowallet.dto.WalletResponse;
+import com.swisspost.cryptowallet.dto.*;
 import com.swisspost.cryptowallet.entity.User;
 import com.swisspost.cryptowallet.entity.Wallet;
 import com.swisspost.cryptowallet.entity.WalletAsset;
@@ -13,11 +10,8 @@ import com.swisspost.cryptowallet.repository.UserRepository;
 import com.swisspost.cryptowallet.repository.WalletAssetRepository;
 import com.swisspost.cryptowallet.repository.WalletRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static com.swisspost.cryptowallet.dto.WalletRequest.mapWalletAssetDtoToWalletAsset;
 import static com.swisspost.cryptowallet.dto.WalletResponse.mapWalletToWalletResponse;
