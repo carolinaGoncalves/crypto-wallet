@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Optional;
 
 import static com.swisspost.cryptowallet.dto.UserResponse.mapUserDtoToUser;
@@ -27,7 +28,7 @@ public class UserService {
 
     public UserResponse createUser(@Valid UserRequest userRequest) {
         User user = mapUserDtoToUser(userRequest);
-        user.setCreatedAt(LocalDateTime.now());
+        user.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
         User saved = userRepository.save(user);
         return mapUserToUserDto(saved);

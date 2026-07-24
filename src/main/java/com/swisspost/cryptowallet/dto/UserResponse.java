@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 @Data
 @AllArgsConstructor
@@ -27,7 +28,7 @@ public class UserResponse {
         return new User(
                 user.getUsername(),
                 user.getFullName(),
-                LocalDateTime.now()
+                LocalDateTime.now(ZoneOffset.UTC)
         );
     }
 
