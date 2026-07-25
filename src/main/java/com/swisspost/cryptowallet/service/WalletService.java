@@ -1,23 +1,29 @@
 package com.swisspost.cryptowallet.service;
 
-import com.swisspost.cryptowallet.dto.*;
+import com.swisspost.cryptowallet.dto.request.WalletAssetRequest;
+import com.swisspost.cryptowallet.dto.request.WalletRequest;
+import com.swisspost.cryptowallet.dto.response.WalletResponse;
 import com.swisspost.cryptowallet.entity.User;
 import com.swisspost.cryptowallet.entity.Wallet;
 import com.swisspost.cryptowallet.entity.WalletAsset;
-import com.swisspost.cryptowallet.exception.UserNotFoundException;
+import com.swisspost.cryptowallet.exception.WalletAlreadyExistsException;
 import com.swisspost.cryptowallet.exception.WalletNotFoundException;
 import com.swisspost.cryptowallet.repository.UserRepository;
 import com.swisspost.cryptowallet.repository.WalletAssetRepository;
 import com.swisspost.cryptowallet.repository.WalletRepository;
+import com.swisspost.cryptowallet.utils.UserValidationUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 
-import static com.swisspost.cryptowallet.dto.WalletRequest.mapWalletAssetDtoToWalletAsset;
-import static com.swisspost.cryptowallet.dto.WalletResponse.mapWalletToWalletResponse;
+import static com.swisspost.cryptowallet.dto.request.WalletRequest.mapWalletAssetDtoToWalletAsset;
+import static com.swisspost.cryptowallet.dto.response.WalletResponse.mapWalletToWalletResponse;
 
 @Service
 public class WalletService {
+
+    private static final Logger log = LoggerFactory.getLogger(WalletService.class);
 
     private final WalletAssetRepository walletAssetRepository;
     private final WalletRepository walletRepository;
@@ -31,27 +37,34 @@ public class WalletService {
 
     public WalletResponse create(WalletRequest walletRequest){
         String username = walletRequest.getUsername();
-        Optional<User> user = userRepository.findByUsername(username);
+        log.debug("Creating wallet for user: {}", username);
 
-        if(user.isEmpty()){
-            throw new UserNotFoundException("User not found for "+username);
+        User user = UserValidationUtils.getUserIfExists(userRepository, username);
+
+        if(walletRepository.findByUserUsername(username).isPresent()){
+            log.warn("User {} have already a wallet", username);
+            throw new WalletAlreadyExistsException("User have already a wallet");
         }
 
-        Wallet wallet = new Wallet(user.get());
+        Wallet wallet = new Wallet(user);
         walletRepository.save(wallet);
+        log.debug("Wallet saved for user: {}", username);
 
         return mapWalletToWalletResponse(wallet);
     }
 
     public WalletResponse createAsset(String username, WalletAssetRequest walletAssetRequest) {
-        Wallet wallet = walletRepository.findByUserUsername(username)
-                .orElseThrow(() -> new WalletNotFoundException(username));
+        UserValidationUtils.getUserIfExists(userRepository, username);
+        log.debug("Creating wallet asset for user: {}", username);
+
+        Wallet wallet = getWallet(username);
 
         WalletAsset walletAsset = mapWalletAssetDtoToWalletAsset(walletAssetRequest);
         wallet.getAssets().add(walletAsset);
         walletAsset.setWallet(wallet);
 
         walletAssetRepository.save(walletAsset);
+        log.info("Wallet asset {} added to wallet for user {}", walletAsset.getSymbol(), username);
 
         return mapWalletToWalletResponse(wallet);
     }
@@ -59,12 +72,20 @@ public class WalletService {
 
 
     public WalletResponse getByUsername(String username){
-        Wallet wallet = walletRepository.findByUserUsername(username)
-                .orElseThrow(() -> new WalletNotFoundException(username));
+        UserValidationUtils.getUserIfExists(userRepository, username);
+        log.debug("Getting wallet for user: {}", username);
+
+        Wallet wallet = getWallet(username);
 
         return mapWalletToWalletResponse(wallet);
 
     }
+
+    private Wallet getWallet(String username) {
+        return walletRepository.findByUserUsername(username)
+                .orElseThrow(() -> new WalletNotFoundException(username));
+    }
+
 
 }
 

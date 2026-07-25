@@ -1,15 +1,15 @@
-package com.swisspost.cryptowallet.dto;
+package com.swisspost.cryptowallet.dto.request;
 
 import com.swisspost.cryptowallet.entity.WalletAsset;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NonNull;
 
 @Data
 @AllArgsConstructor
 public class WalletRequest {
 
-    @NonNull
+    @NotBlank(message = "username is required")
     private String username;
 
 

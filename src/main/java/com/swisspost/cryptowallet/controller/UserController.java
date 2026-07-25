@@ -1,7 +1,7 @@
 package com.swisspost.cryptowallet.controller;
 
-import com.swisspost.cryptowallet.dto.UserRequest;
-import com.swisspost.cryptowallet.dto.UserResponse;
+import com.swisspost.cryptowallet.dto.request.UserRequest;
+import com.swisspost.cryptowallet.dto.response.UserResponse;
 import com.swisspost.cryptowallet.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -20,8 +20,8 @@ public class UserController {
     }
 
     @GetMapping("/username/{username}")
-    public UserResponse getByUsername(@PathVariable String username) {
-        return userService.findUserByUsername(username);
+    public  ResponseEntity<UserResponse> getByUsername(@PathVariable String username) {
+        return ResponseEntity.status(HttpStatus.OK).body(userService.findUserByUsername(username));
     }
 
     @PostMapping

@@ -10,11 +10,12 @@ import java.util.List;
 public interface PriceHistoryRepository extends JpaRepository<PriceHistory, Long> {
 
     @Query("""
-        SELECT ph FROM PriceHistory ph
-        WHERE ph.symbol IN :symbols
-        AND ph.retrievedDate = (
-            SELECT MAX(ph2.retrievedDate) FROM PriceHistory ph2 WHERE ph2.symbol = ph.symbol
-                    and ph2.retrievedDate<= :date
+        SELECT priceHistory
+        FROM PriceHistory priceHistory
+        WHERE priceHistory.symbol IN :symbols
+        AND priceHistory.retrievedDate = (
+            SELECT MAX(ph.retrievedDate) FROM PriceHistory ph WHERE ph.symbol = priceHistory.symbol
+                    and ph.retrievedDate<= :date
         )
         """)
     List<PriceHistory> findLatestPricesByDate(List<String> symbols, LocalDateTime date);

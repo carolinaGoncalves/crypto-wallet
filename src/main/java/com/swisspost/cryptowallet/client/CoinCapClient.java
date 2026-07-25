@@ -1,6 +1,6 @@
 package com.swisspost.cryptowallet.client;
 
-import com.swisspost.cryptowallet.dto.PriceSymbolResponse;
+import com.swisspost.cryptowallet.dto.response.PriceSymbolResponse;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

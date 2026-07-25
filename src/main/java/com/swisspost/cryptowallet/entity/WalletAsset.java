@@ -27,10 +27,10 @@ public class WalletAsset {
     @Column(nullable = false, length = 10)
     private String symbol;
 
-    @Column(nullable = false, precision = 24, scale = 8)
+    @Column(nullable = false, precision = 20, scale = 6)
     private BigDecimal quantity;
 
-    @Column(nullable = false, precision = 24, scale = 8)
+    @Column(nullable = false, precision = 20, scale = 6)
     private BigDecimal purchasePrice;
 
     @Column(nullable = false)

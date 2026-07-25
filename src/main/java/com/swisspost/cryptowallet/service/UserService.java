@@ -1,22 +1,24 @@
 package com.swisspost.cryptowallet.service;
 
-import com.swisspost.cryptowallet.dto.UserRequest;
-import com.swisspost.cryptowallet.dto.UserResponse;
+import com.swisspost.cryptowallet.dto.request.UserRequest;
+import com.swisspost.cryptowallet.dto.response.UserResponse;
 import com.swisspost.cryptowallet.entity.User;
-import com.swisspost.cryptowallet.exception.UserNotFoundException;
 import com.swisspost.cryptowallet.repository.UserRepository;
+import com.swisspost.cryptowallet.utils.UserValidationUtils;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Optional;
 
-import static com.swisspost.cryptowallet.dto.UserResponse.mapUserDtoToUser;
-import static com.swisspost.cryptowallet.dto.UserResponse.mapUserToUserDto;
+import static com.swisspost.cryptowallet.dto.response.UserResponse.mapUserDtoToUser;
+import static com.swisspost.cryptowallet.dto.response.UserResponse.mapUserToUserDto;
 
 @Service
 public class UserService {
+    private static final Logger log = LoggerFactory.getLogger(UserService.class);
 
     private final UserRepository userRepository;
 
@@ -31,18 +33,16 @@ public class UserService {
         user.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
 
         User saved = userRepository.save(user);
+        log.info("User {} created successfully", user.getUsername());
         return mapUserToUserDto(saved);
     }
 
 
     public UserResponse findUserByUsername(String username){
-       Optional<User> user =  userRepository.findByUsername(username);
+        User user = UserValidationUtils.getUserIfExists(userRepository, username);
+        log.info("User {} found", username);
+        return mapUserToUserDto(user);
 
-        if(user.isPresent()){
-            return mapUserToUserDto(user.get());
-        }
-
-        throw new UserNotFoundException(username);
     }
 
 }

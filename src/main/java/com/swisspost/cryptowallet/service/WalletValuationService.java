@@ -1,15 +1,20 @@
 package com.swisspost.cryptowallet.service;
 
-import com.swisspost.cryptowallet.dto.AssetValuationResponse;
-import com.swisspost.cryptowallet.dto.SymbolQuantityAsset;
-import com.swisspost.cryptowallet.dto.WalletValueResponse;
-import com.swisspost.cryptowallet.entity.PriceHistory;
+import com.swisspost.cryptowallet.dto.response.AssetValuationResponse;
+import com.swisspost.cryptowallet.dto.query.SymbolQuantityAsset;
+import com.swisspost.cryptowallet.dto.query.WalletPriceData;
+import com.swisspost.cryptowallet.dto.response.WalletValueResponse;
+import com.swisspost.cryptowallet.entity.User;
 import com.swisspost.cryptowallet.entity.Wallet;
 import com.swisspost.cryptowallet.exception.InvalidDateException;
+import com.swisspost.cryptowallet.exception.UserNotFoundException;
 import com.swisspost.cryptowallet.exception.WalletNotFoundException;
 import com.swisspost.cryptowallet.repository.PriceHistoryRepository;
+import com.swisspost.cryptowallet.repository.UserRepository;
 import com.swisspost.cryptowallet.repository.WalletAssetRepository;
 import com.swisspost.cryptowallet.repository.WalletRepository;
+import com.swisspost.cryptowallet.utils.UserValidationUtils;
+import com.swisspost.cryptowallet.utils.WalletPriceDataUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,7 +26,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class WalletValuationService {
@@ -29,52 +33,59 @@ public class WalletValuationService {
     private final WalletAssetRepository walletAssetRepository;
     private final WalletRepository walletRepository;
     private final PriceHistoryRepository priceHistoryRepository;
+    private final UserRepository userRepository;
 
 
-    public WalletValuationService(WalletAssetRepository walletAssetRepository, WalletRepository walletRepository, PriceHistoryRepository priceHistoryRepository) {
+    public WalletValuationService(WalletAssetRepository walletAssetRepository, WalletRepository walletRepository, PriceHistoryRepository priceHistoryRepository, UserRepository userRepository) {
         this.walletAssetRepository = walletAssetRepository;
         this.walletRepository = walletRepository;
         this.priceHistoryRepository = priceHistoryRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional
     public WalletValueResponse getWalletValueByUsername(String username, LocalDate date){
-        LocalDateTime filterDate = date.atTime(LocalTime.MAX);
+        UserValidationUtils.getUserIfExists(userRepository, username);
 
-        if(filterDate.isAfter(LocalDateTime.now(ZoneOffset.UTC))){
-            throw new InvalidDateException("Date cannot be in the future: "+filterDate.toLocalDate());
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        if (date.isAfter(today)) {
+            throw new InvalidDateException("Date cannot be in the future: " + date);
         }
+
+        LocalDateTime filterDate = date.atTime(LocalTime.MAX);
 
         Wallet wallet = walletRepository.findByUserUsername(username)
                 .orElseThrow(() -> new WalletNotFoundException(username));
 
-        if (wallet.getAssets().isEmpty()) {
-            return WalletValueResponse.mapWalletToWalletResponse(wallet,new BigDecimal("0.0"), new ArrayList<>(),
-                    filterDate);
+        WalletValueResponse walletValueResponse = getWalletValueResponse(wallet, filterDate);
+
+        if (walletValueResponse != null){
+            return walletValueResponse;
         }
 
-        List<SymbolQuantityAsset> quantitiesBySymbol =
-                walletAssetRepository.sumQuantityGroupedBySymbolAndByPurchaseDate(wallet.getId(), filterDate);
+        WalletPriceData walletPriceData = WalletPriceDataUtils.buildWalletPriceData(walletAssetRepository,
+                priceHistoryRepository, wallet, filterDate);
 
-        List<String> symbols = quantitiesBySymbol.stream()
-                .map(SymbolQuantityAsset::getSymbol)
-                .toList();
-
-        Map<String, BigDecimal> priceBySymbol = priceHistoryRepository.findLatestPricesByDate(symbols, filterDate).stream()
-                .collect(Collectors.toMap(PriceHistory::getSymbol, PriceHistory::getPrice));
-
-        List<AssetValuationResponse> assetValues = mapAssetValuationResponse(quantitiesBySymbol, priceBySymbol);
+        List<AssetValuationResponse> assetValues = mapAssetValuationResponse(walletPriceData.getQuantitiesBySymbol(), walletPriceData.getPriceBySymbol());
 
         BigDecimal currentValue = computeCurrentValue(assetValues);
 
         return WalletValueResponse.mapWalletToWalletResponse(wallet,currentValue, assetValues, filterDate);
     }
 
+    static WalletValueResponse getWalletValueResponse(Wallet wallet, LocalDateTime filterDate) {
+        if (wallet.getAssets().isEmpty()) {
+            return WalletValueResponse.mapWalletToWalletResponse(wallet, new BigDecimal("0.0"), new ArrayList<>(),
+                    filterDate);
+        }
+        return null;
+    }
+
     private BigDecimal computeCurrentValue(List<AssetValuationResponse> assetValues) {
         BigDecimal totalValue = BigDecimal.ZERO;
         for (AssetValuationResponse asset : assetValues) {
             if(asset.getCurrentAssetValue()==null){
-                continue;
+                asset.setCurrentAssetValue(new BigDecimal("0.0"));
             }
             totalValue = totalValue.add(asset.getCurrentAssetValue());
         }
@@ -86,10 +97,15 @@ public class WalletValuationService {
         return quantitiesBySymbol.stream()
                 .map(symbolQuantityAsset -> {
                     BigDecimal price = priceBySymbol.get(symbolQuantityAsset.getSymbol());
-                    BigDecimal value = price!=null? symbolQuantityAsset.getQuantity().multiply(price):null;
-                    return new AssetValuationResponse(symbolQuantityAsset.getSymbol(), symbolQuantityAsset.getQuantity(), price, value);
+                    BigDecimal value = price!=null? symbolQuantityAsset.getQuantity().multiply(price):new BigDecimal("0.0");
+                    return new AssetValuationResponse(symbolQuantityAsset.getSymbol(), symbolQuantityAsset.getQuantity(), price!=null?price:new BigDecimal("0.0"), value);
                 })
                 .toList();
+    }
+
+    private User getUser(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
     }
 
 }

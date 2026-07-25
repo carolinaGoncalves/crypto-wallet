@@ -1,4 +1,4 @@
-package com.swisspost.cryptowallet.dto;
+package com.swisspost.cryptowallet.dto.response;
 
 import com.swisspost.cryptowallet.entity.Wallet;
 import lombok.AllArgsConstructor;
@@ -21,6 +21,6 @@ public class WalletValueResponse {
     public static WalletValueResponse mapWalletToWalletResponse(Wallet wallet, BigDecimal value,
                                                                 List<AssetValuationResponse> assetValues,
                                                                 LocalDateTime localDateTime) {
-        return new WalletValueResponse(wallet.getUser().getUsername(), value, localDateTime, assetValues);
+        return new WalletValueResponse(wallet.getUser().getUsername(), value==null?new BigDecimal("0.0"):value, localDateTime, assetValues);
     }
 }

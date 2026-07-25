@@ -19,6 +19,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class PriceHistorySchedulingTest {
 
+    public static final String ETB = "ETB";
+    public static final String MASK = "MASK";
+    public static final String ACE = "ACE";
+    public static final String ING = "ING";
     private PriceHistoryScheduling priceHistoryScheduling;
 
     @Mock
@@ -42,44 +46,32 @@ class PriceHistorySchedulingTest {
     }
 
     @Test
-    public void givenDistinctSymbols_whenInsertPriceAssets_thenNoGetAndInsertPricesCalls(){
-        when(walletAssetRepository.findDistinctSymbols()).thenReturn(List.of("ETB","MASK","ACE", "ING"));
+    public void givenDistinctSymbols_whenInsertPriceAssets_thenGetAndInsertPricesCalls(){
+        when(walletAssetRepository.findDistinctSymbols()).thenReturn(List.of(ETB, MASK, ACE, ING));
 
         priceHistoryScheduling.insertPriceAssets();
 
         await().atMost(2, TimeUnit.SECONDS).untilAsserted(() -> {
-            verify(priceService, times(1)).getAndInsertPrices("ETB");
-            verify(priceService, times(1)).getAndInsertPrices("MASK");
-            verify(priceService, times(1)).getAndInsertPrices("ACE");
-            verify(priceService, times(1)).getAndInsertPrices("ING");
+            verify(priceService, times(1)).getAndInsertPrices(ETB);
+            verify(priceService, times(1)).getAndInsertPrices(MASK);
+            verify(priceService, times(1)).getAndInsertPrices(ACE);
+            verify(priceService, times(1)).getAndInsertPrices(ING);
         });
     }
 
     @Test
-    void givenOneNullSymbol_whenInsertPriceAssets_thenOtherPricesInserted() {
-        when(walletAssetRepository.findDistinctSymbols()).thenReturn(List.of("BTC", "TBD", "ETH"));
-
-        priceHistoryScheduling.insertPriceAssets();
-
-        await().atMost(2, TimeUnit.SECONDS).untilAsserted(() -> {
-            verify(priceService, times(1)).getAndInsertPrices("BTC");
-            verify(priceService, times(1)).getAndInsertPrices("TBD");
-            verify(priceService, times(1)).getAndInsertPrices("ETH");
-        });
-    }
-
-    @Test
-    void givenSymbolThrowsException_whenInsertPriceAssets_thenExceptionIsCaughtAndHandled() {
-        when(walletAssetRepository.findDistinctSymbols()).thenReturn(List.of("BTC"));
+    void givenOneSymbolFails_whenInsertPriceAssets_thenOtherSymbolsStill() {
+        when(walletAssetRepository.findDistinctSymbols()).thenReturn(List.of(ETB, ING, ACE));
 
         doThrow(new RuntimeException("CoinCap unavailable"))
-                .when(priceService).getAndInsertPrices("BTC");
+                .when(priceService).getAndInsertPrices(ING);
 
-        assertThatCode(() -> priceHistoryScheduling.insertPriceAssets())
-                .doesNotThrowAnyException();
+        priceHistoryScheduling.insertPriceAssets();
 
-        await().atMost(2, TimeUnit.SECONDS).untilAsserted(() ->
-                verify(priceService, times(1)).getAndInsertPrices("BTC")
-        );
+        await().atMost(2, TimeUnit.SECONDS).untilAsserted(() -> {
+            verify(priceService, times(1)).getAndInsertPrices(ETB);
+            verify(priceService, times(1)).getAndInsertPrices(ING);
+            verify(priceService, times(1)).getAndInsertPrices(ACE);
+        });
     }
 }
