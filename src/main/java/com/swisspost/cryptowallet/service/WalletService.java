@@ -6,6 +6,7 @@ import com.swisspost.cryptowallet.dto.response.WalletResponse;
 import com.swisspost.cryptowallet.entity.User;
 import com.swisspost.cryptowallet.entity.Wallet;
 import com.swisspost.cryptowallet.entity.WalletAsset;
+import com.swisspost.cryptowallet.exception.InvalidDateException;
 import com.swisspost.cryptowallet.exception.WalletAlreadyExistsException;
 import com.swisspost.cryptowallet.exception.WalletNotFoundException;
 import com.swisspost.cryptowallet.repository.UserRepository;
@@ -16,6 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 
 import static com.swisspost.cryptowallet.dto.request.WalletRequest.mapWalletAssetDtoToWalletAsset;
 import static com.swisspost.cryptowallet.dto.response.WalletResponse.mapWalletToWalletResponse;
@@ -43,7 +47,7 @@ public class WalletService {
 
         if(walletRepository.findByUserUsername(username).isPresent()){
             log.warn("User {} have already a wallet", username);
-            throw new WalletAlreadyExistsException("User have already a wallet");
+            throw new WalletAlreadyExistsException("User already has a wallet");
         }
 
         Wallet wallet = new Wallet(user);
@@ -58,6 +62,11 @@ public class WalletService {
         log.debug("Creating wallet asset for user: {}", username);
 
         Wallet wallet = getWallet(username);
+
+        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
+        if (walletAssetRequest.getPurchaseDate().isAfter(now)) {
+            throw new InvalidDateException("Purchase date cannot be in the future: " + walletAssetRequest.getPurchaseDate());
+        }
 
         WalletAsset walletAsset = mapWalletAssetDtoToWalletAsset(walletAssetRequest);
         wallet.getAssets().add(walletAsset);

@@ -103,9 +103,4 @@ public class WalletValuationService {
                 .toList();
     }
 
-    private User getUser(String username) {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException(username));
-    }
-
 }
