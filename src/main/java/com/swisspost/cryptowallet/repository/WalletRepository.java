@@ -11,7 +11,6 @@ import java.util.UUID;
 
 public interface WalletRepository extends JpaRepository<Wallet, UUID> {
 
-    @Query("SELECT w FROM Wallet w JOIN w.user u WHERE u.username = :username")
     Optional<Wallet> findByUserUsername(String username);
 
 }
