@@ -5,7 +5,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
 @Table(name = "price_history")
@@ -21,7 +20,7 @@ public class PriceHistory {
     @Column(nullable = false, length = 10)
     private String symbol;
 
-    @Column(nullable = false, precision = 24, scale = 8)
+    @Column(nullable = false, precision = 20, scale = 6)
     private BigDecimal price;
 
     @Column(nullable = false)

@@ -33,20 +33,20 @@ public class WalletController {
     @GetMapping("/{username}")
     public ResponseEntity<WalletResponse> getByUsername(@PathVariable String username){
         WalletResponse walletResponse = walletService.getByUsername(username);
-        return ResponseEntity.status(HttpStatus.CREATED).body(walletResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(walletResponse);
     }
 
     @GetMapping("/{username}/value")
     public ResponseEntity<WalletValueResponse> getWalletValueByUsername(@PathVariable String username, @RequestParam(required = false) LocalDate filterDate){
         LocalDate date=filterDate==null? LocalDate.now():filterDate;
         WalletValueResponse walletResponse = walletValuationService.getWalletValueByUsername(username, date);
-        return ResponseEntity.status(HttpStatus.CREATED).body(walletResponse);
+        return ResponseEntity.status(HttpStatus.OK).body(walletResponse);
     }
 
     @GetMapping("/{username}/performances")
     public ResponseEntity<WalletPerformanceResponse> getPerformancesByUsername(@PathVariable String username) {
         WalletPerformanceResponse response = walletPerformanceService.getWalletPerformancesByUsername(username);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @PostMapping

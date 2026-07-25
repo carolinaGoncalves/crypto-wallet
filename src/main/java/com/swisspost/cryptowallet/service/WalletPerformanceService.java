@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,7 +54,7 @@ public class WalletPerformanceService {
         log.debug("Total investments for user={}: {}", username, totalInvestments);
 
         WalletPriceData walletPriceData = WalletPriceDataUtils.buildWalletPriceData(walletAssetRepository,
-                priceHistoryRepository, wallet);
+                priceHistoryRepository, wallet, LocalDateTime.now(ZoneOffset.UTC));
 
         Map<String, BigDecimal> investedValueBySymbol = buildInvestedBySymbol(totalInvestments);
         Map<String, BigDecimal> currentValueBySymbol = buildCurrentValueBySymbol(walletPriceData);

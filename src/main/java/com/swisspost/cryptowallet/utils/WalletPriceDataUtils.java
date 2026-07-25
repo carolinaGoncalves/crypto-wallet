@@ -23,10 +23,10 @@ public class WalletPriceDataUtils {
     public static WalletPriceData buildWalletPriceData(
             WalletAssetRepository walletAssetRepository,
             PriceHistoryRepository priceHistoryRepository,
-            Wallet wallet){
+            Wallet wallet, LocalDateTime filterDate){
 
         List<SymbolQuantityAsset> quantitiesBySymbol =
-                walletAssetRepository.sumQuantityGroupedBySymbolAndByPurchaseDate(wallet.getId(), LocalDateTime.now(ZoneOffset.UTC));
+                walletAssetRepository.sumQuantityGroupedBySymbolAndByPurchaseDate(wallet.getId(), filterDate);
 
         if (quantitiesBySymbol.isEmpty()) {
             log.info("Wallet of user {} has no wallet assets", wallet.getUser().getUsername());
@@ -37,7 +37,7 @@ public class WalletPriceDataUtils {
                 .map(SymbolQuantityAsset::getSymbol)
                 .toList();
 
-        List<PriceHistory> priceHistoryList = priceHistoryRepository.findLatestPricesByDate(symbols, LocalDateTime.now(ZoneOffset.UTC));
+        List<PriceHistory> priceHistoryList = priceHistoryRepository.findLatestPricesByDate(symbols, filterDate);
         Map<String, BigDecimal> priceBySymbol = new HashMap<>();
         for (PriceHistory priceHistory : priceHistoryList) {
             priceBySymbol.put(priceHistory.getSymbol(), priceHistory.getPrice());
