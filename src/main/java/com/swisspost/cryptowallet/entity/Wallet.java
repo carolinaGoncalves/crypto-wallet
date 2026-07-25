@@ -4,8 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Objects;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -19,20 +19,15 @@ public class Wallet {
     @GeneratedValue
     private UUID id;
 
-    @Column(nullable = false, length = 10)
-    private String symbol;
-
-    @Column(nullable = false)
-    private BigDecimal quantity;
-
-    @Column(nullable = false, precision = 24, scale = 8)
-    private BigDecimal purchasePrice;
-
-    @Column(nullable = false)
-    private LocalDateTime purchaseDate;
-
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User userID;
+    private User user;
+
+    @OneToMany(mappedBy = "wallet", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<WalletAsset> assets = new ArrayList<>();
+
+    public Wallet(User user){
+        this.user=user;
+    }
 
 }

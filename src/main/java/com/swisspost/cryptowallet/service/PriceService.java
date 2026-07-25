@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Objects;
 
 @Service
@@ -33,7 +34,7 @@ public class PriceService {
             return;
         }
 
-        PriceHistory priceHistory = new PriceHistory(symbol, value, LocalDateTime.now());
+        PriceHistory priceHistory = new PriceHistory(symbol, value, LocalDateTime.now(ZoneOffset.UTC));
         priceHistoryRepository.save(priceHistory);
         log.info("Inserted {} with value {} ", symbol, value);
 

@@ -1,6 +1,6 @@
 package com.swisspost.cryptowallet.scheduling;
 
-import com.swisspost.cryptowallet.repository.WalletRepository;
+import com.swisspost.cryptowallet.repository.WalletAssetRepository;
 import com.swisspost.cryptowallet.service.PriceService;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
@@ -17,22 +17,22 @@ import java.util.concurrent.Executors;
 public class PriceHistoryScheduling {
 
     private final PriceService priceService;
-    private final WalletRepository walletRepository;
+    private final WalletAssetRepository walletAssetRepository;
 
     private final ExecutorService executorService;
 
     private static final Logger log = LoggerFactory.getLogger(PriceHistoryScheduling.class);
 
-    public PriceHistoryScheduling(PriceService priceService, WalletRepository walletRepository,
+    public PriceHistoryScheduling(PriceService priceService, WalletAssetRepository walletAssetRepository,
                                   @Value("${schedule.price.thread.pool.size}") int threadPoolSize) {
         this.priceService = priceService;
-        this.walletRepository = walletRepository;
+        this.walletAssetRepository = walletAssetRepository;
         this.executorService = Executors.newFixedThreadPool(threadPoolSize);
     }
 
     @Scheduled(cron = "${scheduler.price.cron}")
     public void insertPriceAssets(){
-        List<String> distinctSymbols = walletRepository.findDistinctSymbols();
+        List<String> distinctSymbols = walletAssetRepository.findDistinctSymbols();
 
         if (distinctSymbols.isEmpty()) {
             log.info("No wallets available yet");

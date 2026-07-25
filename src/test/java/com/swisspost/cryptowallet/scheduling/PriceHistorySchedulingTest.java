@@ -1,6 +1,6 @@
 package com.swisspost.cryptowallet.scheduling;
 
-import com.swisspost.cryptowallet.repository.WalletRepository;
+import com.swisspost.cryptowallet.repository.WalletAssetRepository;
 import com.swisspost.cryptowallet.service.PriceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,16 +25,16 @@ class PriceHistorySchedulingTest {
     private PriceService priceService;
 
     @Mock
-    private WalletRepository walletRepository;
+    private WalletAssetRepository walletAssetRepository;
 
     @BeforeEach
     void setUp() {
-        priceHistoryScheduling = new PriceHistoryScheduling(priceService, walletRepository, 3);
+        priceHistoryScheduling = new PriceHistoryScheduling(priceService, walletAssetRepository, 3);
     }
 
     @Test
     public void givenEmptyDistinctSymbols_whenInsertPriceAssets_thenNoGetAndInsertPricesCalls(){
-        when(walletRepository.findDistinctSymbols()).thenReturn(List.of());
+        when(walletAssetRepository.findDistinctSymbols()).thenReturn(List.of());
 
         priceHistoryScheduling.insertPriceAssets();
 
@@ -43,7 +43,7 @@ class PriceHistorySchedulingTest {
 
     @Test
     public void givenDistinctSymbols_whenInsertPriceAssets_thenNoGetAndInsertPricesCalls(){
-        when(walletRepository.findDistinctSymbols()).thenReturn(List.of("ETB","MASK","ACE", "ING"));
+        when(walletAssetRepository.findDistinctSymbols()).thenReturn(List.of("ETB","MASK","ACE", "ING"));
 
         priceHistoryScheduling.insertPriceAssets();
 
@@ -57,7 +57,7 @@ class PriceHistorySchedulingTest {
 
     @Test
     void givenOneNullSymbol_whenInsertPriceAssets_thenOtherPricesInserted() {
-        when(walletRepository.findDistinctSymbols()).thenReturn(List.of("BTC", "TBD", "ETH"));
+        when(walletAssetRepository.findDistinctSymbols()).thenReturn(List.of("BTC", "TBD", "ETH"));
 
         priceHistoryScheduling.insertPriceAssets();
 
@@ -70,7 +70,7 @@ class PriceHistorySchedulingTest {
 
     @Test
     void givenSymbolThrowsException_whenInsertPriceAssets_thenExceptionIsCaughtAndHandled() {
-        when(walletRepository.findDistinctSymbols()).thenReturn(List.of("BTC"));
+        when(walletAssetRepository.findDistinctSymbols()).thenReturn(List.of("BTC"));
 
         doThrow(new RuntimeException("CoinCap unavailable"))
                 .when(priceService).getAndInsertPrices("BTC");
