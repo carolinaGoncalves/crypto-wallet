@@ -1,4 +1,4 @@
-package com.swisspost.cryptowallet.dto;
+package com.swisspost.cryptowallet.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

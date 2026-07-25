@@ -1,4 +1,4 @@
-package com.swisspost.cryptowallet.dto;
+package com.swisspost.cryptowallet.dto.response;
 
 import com.swisspost.cryptowallet.entity.Wallet;
 import com.swisspost.cryptowallet.entity.WalletAsset;
@@ -7,7 +7,6 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @AllArgsConstructor
