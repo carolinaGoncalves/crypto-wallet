@@ -17,7 +17,6 @@ public interface WalletAssetRepository extends JpaRepository<WalletAsset, UUID> 
 
 
     @Query("""
-
             SELECT new com.swisspost.cryptowallet.dto.query.SymbolQuantityAsset(wa.symbol, SUM(wa.quantity))
         FROM WalletAsset wa
         WHERE wa.wallet.id = :walletId and wa.purchaseDate<= :date

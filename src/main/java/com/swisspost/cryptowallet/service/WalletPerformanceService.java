@@ -130,7 +130,7 @@ public class WalletPerformanceService {
 
         BigDecimal gainOrLoss = current.subtract(invested);
         return gainOrLoss
-                .divide(invested, 6, RoundingMode.HALF_UP)
+                .divide(invested, 12, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(100))
                 .setScale(2, RoundingMode.HALF_UP);
     }

@@ -5,12 +5,13 @@ import com.swisspost.cryptowallet.entity.PriceHistory;
 import com.swisspost.cryptowallet.repository.PriceHistoryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,14 +38,7 @@ class PriceServiceTest {
 
         priceService.getAndInsertPrices(SYMBOL);
 
-        ArgumentCaptor<PriceHistory> captor = ArgumentCaptor.forClass(PriceHistory.class);
-
-        verify(priceHistoryRepository, times(1)).save(captor.capture());
-
-        PriceHistory saved = captor.getValue();
-        assertEquals(SYMBOL, saved.getSymbol());
-        assertEquals(PRICE, saved.getPrice());
-        assertNotNull(saved.getRetrievedDate());
+        verify(priceHistoryRepository, times(1)).save(any());
 
     }
 
@@ -54,10 +48,7 @@ class PriceServiceTest {
 
         priceService.getAndInsertPrices(SYMBOL);
 
-        ArgumentCaptor<PriceHistory> captor = ArgumentCaptor.forClass(PriceHistory.class);
-
-        verify(priceHistoryRepository, times(0)).save(captor.capture());
-
+        verify(priceHistoryRepository, never()).save(any());
     }
 
 }

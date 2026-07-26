@@ -26,8 +26,6 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-
-
     public UserResponse createUser(@Valid UserRequest userRequest) {
         User user = mapUserDtoToUser(userRequest);
         user.setCreatedAt(LocalDateTime.now(ZoneOffset.UTC));
@@ -36,7 +34,6 @@ public class UserService {
         log.info("User {} created successfully", user.getUsername());
         return mapUserToUserDto(saved);
     }
-
 
     public UserResponse findUserByUsername(String username){
         User user = UserValidationUtils.getUserIfExists(userRepository, username);
