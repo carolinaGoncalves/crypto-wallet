@@ -142,6 +142,8 @@ quantity × purchase_price
 The best and worst performing assets are the highest and lowest values in that wallet asset list.
 If an asset has no investment, its performance is returned as 0% rather than throwing.
 
+I use round HALF_UP because it matches the rounding behavior that I must use. This will round the 2.5 to away from zero so it will be 3 (example).
+
 ### Time zone handling
 The backend will treat every date and comparison using UTC, never the server local time zone.
 This keeps the behavior the same no matter where the app is deployed.
