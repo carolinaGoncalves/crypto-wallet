@@ -1,7 +1,6 @@
 package com.swisspost.cryptowallet.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -27,10 +26,10 @@ public class WalletAsset {
     @Column(nullable = false, length = 10)
     private String symbol;
 
-    @Column(nullable = false, precision = 20, scale = 6)
+    @Column(nullable = false, precision = 20, scale = 12)
     private BigDecimal quantity;
 
-    @Column(nullable = false, precision = 20, scale = 6)
+    @Column(nullable = false, precision = 20, scale = 12)
     private BigDecimal purchasePrice;
 
     @Column(nullable = false)

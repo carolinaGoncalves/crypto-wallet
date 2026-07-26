@@ -18,11 +18,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,10 +50,14 @@ class WalletPerformanceServiceTest {
     @InjectMocks
     private WalletPerformanceService walletPerformanceService;
 
+    private UUID walletId;
+
     @BeforeEach
     void setUp() {
         User user = new User(USERNAME, "username", LocalDateTime.now());
         Wallet wallet = new Wallet(user);
+        walletId = UUID.randomUUID();
+        wallet.setId(walletId);
 
         when(userRepository.findByUsername(USERNAME)).thenReturn(Optional.of(user));
         when(walletRepository.findByUserUsername(USERNAME)).thenReturn(Optional.of(wallet));
@@ -58,16 +65,18 @@ class WalletPerformanceServiceTest {
 
     @Test
     void givenValidUserAndWallet_whenGetWalletPerformancesByUsername_thenReturnsWalletPerformanceResponse() {
+        LocalDateTime expectedFilterDate = LocalDate.now(ZoneOffset.UTC).atTime(LocalTime.MAX);
+
         SymbolTotalInvestment btcInvestment = new SymbolTotalInvestment(BTC, BigDecimal.valueOf(50000));
         SymbolTotalInvestment ethInvestment = new SymbolTotalInvestment(ETH, BigDecimal.valueOf(20000));
-       
-        when(walletAssetRepository.sumTotalInvestmentGroupedBySymbol(nullable(UUID.class)))
+
+        when(walletAssetRepository.sumTotalInvestmentGroupedBySymbol(walletId))
                 .thenReturn(List.of(btcInvestment, ethInvestment));
 
         SymbolQuantityAsset btcQuantity = new SymbolQuantityAsset(BTC, BigDecimal.valueOf(2));
         SymbolQuantityAsset ethQuantity = new SymbolQuantityAsset(ETH, BigDecimal.valueOf(10));
-        
-        when(walletAssetRepository.sumQuantityGroupedBySymbolAndByPurchaseDate(nullable(UUID.class), any(LocalDateTime.class)))
+
+        when(walletAssetRepository.sumQuantityGroupedBySymbolAndByPurchaseDate(walletId, expectedFilterDate))
                 .thenReturn(List.of(btcQuantity, ethQuantity));
 
         PriceHistory btcPrice = new PriceHistory();
@@ -78,7 +87,7 @@ class WalletPerformanceServiceTest {
         ethPrice.setSymbol(ETH);
         ethPrice.setPrice(BigDecimal.valueOf(1500));
 
-        when(priceHistoryRepository.findLatestPricesByDate(anyList(), any(LocalDateTime.class)))
+        when(priceHistoryRepository.findLatestPricesByDate(List.of(BTC, ETH), expectedFilterDate))
                 .thenReturn(List.of(btcPrice, ethPrice));
 
         WalletPerformanceResponse response = walletPerformanceService.getWalletPerformancesByUsername(USERNAME);
@@ -92,16 +101,18 @@ class WalletPerformanceServiceTest {
 
     @Test
     void givenWalletAssetWithoutPriceAvailable_whenGetWalletPerformancesByUsername_thenExcludesAssetWithoutPrice() {
+        LocalDateTime expectedFilterDate = LocalDate.now(ZoneOffset.UTC).atTime(LocalTime.MAX);
+
         SymbolTotalInvestment ethInvestment = new SymbolTotalInvestment(ETH, BigDecimal.valueOf(20000));
 
-        when(walletAssetRepository.sumTotalInvestmentGroupedBySymbol(nullable(UUID.class)))
+        when(walletAssetRepository.sumTotalInvestmentGroupedBySymbol(walletId))
                 .thenReturn(List.of(ethInvestment));
 
         SymbolQuantityAsset ethQuantity = new SymbolQuantityAsset(ETH, BigDecimal.valueOf(10));
 
-        when(walletAssetRepository.sumQuantityGroupedBySymbolAndByPurchaseDate(nullable(UUID.class), any(LocalDateTime.class)))
+        when(walletAssetRepository.sumQuantityGroupedBySymbolAndByPurchaseDate(walletId, expectedFilterDate))
                 .thenReturn(List.of(ethQuantity));
-        when(priceHistoryRepository.findLatestPricesByDate(anyList(), any(LocalDateTime.class)))
+        when(priceHistoryRepository.findLatestPricesByDate(List.of(ETH), expectedFilterDate))
                 .thenReturn(Collections.emptyList());
 
         WalletPerformanceResponse response = walletPerformanceService.getWalletPerformancesByUsername(USERNAME);
@@ -113,11 +124,12 @@ class WalletPerformanceServiceTest {
 
     @Test
     void givenEmptyWallet_whenGetWalletPerformancesByUsername_thenReturnsEmptyWalletPerformanceResponse() {
-        when(walletAssetRepository.sumTotalInvestmentGroupedBySymbol(nullable(UUID.class)))
+        LocalDateTime expectedFilterDate = LocalDate.now(ZoneOffset.UTC).atTime(LocalTime.MAX);
+
+        when(walletAssetRepository.sumTotalInvestmentGroupedBySymbol(walletId))
                 .thenReturn(Collections.emptyList());
 
-        when(walletAssetRepository.sumQuantityGroupedBySymbolAndByPurchaseDate(nullable(UUID.class),
-                any(LocalDateTime.class)))
+        when(walletAssetRepository.sumQuantityGroupedBySymbolAndByPurchaseDate(walletId, expectedFilterDate))
                 .thenReturn(Collections.emptyList());
 
         WalletPerformanceResponse response = walletPerformanceService.getWalletPerformancesByUsername(USERNAME);
@@ -125,6 +137,29 @@ class WalletPerformanceServiceTest {
         assertTrue(response.getAssets().isEmpty());
         assertNull(response.getBestPerforming());
         assertNull(response.getWorstPerforming());
+    }
+
+    @Test
+    void givenAssetPurchasedTodayDate_whenGetWalletPerformancesByUsername_thenFilterDateForTheMaxValue() {
+        LocalDateTime expectedFilterDate = LocalDate.now(ZoneOffset.UTC).atTime(LocalTime.MAX);
+
+        SymbolTotalInvestment btcInvestment = new SymbolTotalInvestment(BTC, BigDecimal.valueOf(50000));
+        SymbolQuantityAsset btcQuantity = new SymbolQuantityAsset(BTC, BigDecimal.valueOf(2));
+
+        PriceHistory btcPrice = new PriceHistory();
+        btcPrice.setSymbol(BTC);
+        btcPrice.setPrice(BigDecimal.valueOf(30000));
+
+        when(walletAssetRepository.sumTotalInvestmentGroupedBySymbol(walletId))
+                .thenReturn(List.of(btcInvestment));
+        when(walletAssetRepository.sumQuantityGroupedBySymbolAndByPurchaseDate(walletId, expectedFilterDate))
+                .thenReturn(List.of(btcQuantity));
+        when(priceHistoryRepository.findLatestPricesByDate(List.of(BTC), expectedFilterDate))
+                .thenReturn(List.of(btcPrice));
+
+        walletPerformanceService.getWalletPerformancesByUsername(USERNAME);
+
+        verify(walletAssetRepository).sumQuantityGroupedBySymbolAndByPurchaseDate(walletId, expectedFilterDate);
     }
 
 }
