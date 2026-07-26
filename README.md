@@ -12,7 +12,7 @@ Uses a scheduler job that fetch market prices from an external API, the CoinCap 
 
 ## Prerequisites
 - Windows/macOS: install [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-- A CoinCap API key (https://coincap.io)
+- Get CoinCap API key in https://coincap.io
 
 It's not necessary to install JAVA, IDEA, maven because will run inside a docker environment.
 
@@ -143,6 +143,10 @@ The best and worst performing assets are the highest and lowest values in that w
 If an asset has no investment, its performance is returned as 0% rather than throwing.
 
 I use round HALF_UP because it matches the rounding behavior that I must use. This will round the 2.5 to away from zero so it will be 3 (example).
+
+Wallet valuation and wallet performance handle missing prices differently on purpose: valuation includes the asset at with 0 value
+while performance excludes it entirely (to not be part of the percentage calculation and to not be compared).
+
 
 ### Time zone handling
 The backend will treat every date and comparison using UTC, never the server local time zone.
