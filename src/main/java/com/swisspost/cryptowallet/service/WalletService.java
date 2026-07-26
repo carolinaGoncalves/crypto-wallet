@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
@@ -63,8 +64,8 @@ public class WalletService {
 
         Wallet wallet = getWallet(username);
 
-        LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
-        if (walletAssetRequest.getPurchaseDate().isAfter(now)) {
+        LocalDate now = LocalDate.now(ZoneOffset.UTC);
+        if (walletAssetRequest.getPurchaseDate().toLocalDate().isAfter(now)) {
             throw new InvalidDateException("Purchase date cannot be in the future: " + walletAssetRequest.getPurchaseDate());
         }
 
