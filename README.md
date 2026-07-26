@@ -128,7 +128,7 @@ I chose to compare dates using the end of day time value (23:59:59.999) to avoid
 Comparing against the exact current instant exclude assets purchased earlier.
 
 I added transactional annotation because I have a more than one read operation and this will ensure that I will use the same connection database for all and to avoid LazyInitializationException
-because session will be open in all method.
+because session will be opened in all method.
 
 ### Performance calculation
 It's calculated per symbol using the follow formula returning a % value:
@@ -157,6 +157,7 @@ a class to centralize the exception using the annotation @ControllerAdvice that 
 - WalletAlreadyExistsException - 409;
 - InvalidDateException - 400;
 - handle parameters validation - 400;
+
 to the appropriate HTTP status and I added a method to catch all the other exception not mapped returning a 500. 
 
 ## Testing
