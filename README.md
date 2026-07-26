@@ -1,6 +1,7 @@
 # Crypto Wallet system
 A Spring Boot backend service that allows a user to fetch the value and performance of cryptocurrency wallet. 
-Uses a scheduler job that fetch market prices from an external API, the CoinCap API, and stores price data history, and have REST APIs to query wallet value and asset performance.
+Uses a scheduler job that fetches market prices from an external API, the CoinCap API, and stores price data history, 
+and provides REST APIs to query wallet value and asset performance.
 
 ## Tech Stack
 - Java 17
@@ -39,7 +40,7 @@ set COINCAP_API_KEY=your_coincap_api_key
 ```
 ## How to Run
 
-From the project root, on any OS:
+From the project root for Windows and macOS:
 
 ```bash
 docker compose up --build
@@ -123,8 +124,8 @@ Each thread handles its own exceptions, so if something fails while fetching one
 I used the same endpoint to cover both point a) and point b) from the challenge instructions, with a query parameter to filter by date. 
 This parameter is optional and if omitted will use the current system date.
 Wallet value on a given date is calculated by summing only the WalletAsset rows that have the purchase date before or on that date, using the most recent PriceHistory entry available using the same filter date.
-I validate if the date is in the future and if so the endpoint returns an invalidDateException.
-I chose to compare dates using the end of day time value (23:59:59.999) to avoid unexpected results caused by time zone differences as Swagger doesn't convert input to UTC automatically,
+I validate if the date is in the future and if so the endpoint returns an InvalidDateException.
+I chose to compare dates using the end of day time value (23:59:59.999) to avoid unexpected results caused by time zone differences as Swagger doesn't convert input to UTC automatically.
 Comparing against the exact current instant exclude assets purchased earlier.
 
 I added transactional annotation because I have a more than one read operation and this will ensure that I will use the same connection database for all and to avoid LazyInitializationException
@@ -142,9 +143,10 @@ quantity × purchase_price
 The best and worst performing assets are the highest and lowest values in that wallet asset list.
 If an asset has no investment, its performance is returned as 0% rather than throwing.
 
-I use round HALF_UP because it matches the rounding behavior that I must use. This will round the 2.5 to away from zero so it will be 3 (example).
+I use round HALF_UP because it matches the round behavior that I normally use and is most common. 
+This will round the 2.5 to away from zero so it will be 3 (example).
 
-Wallet valuation and wallet performance handle missing prices differently on purpose: valuation includes the asset at with 0 value
+Wallet valuation and wallet performance handle missing prices differently on purpose: valuation includes the asset at a value of 0
 while performance excludes it entirely (to not be part of the percentage calculation and to not be compared).
 
 
