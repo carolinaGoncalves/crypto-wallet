@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Optional;
 
@@ -57,7 +58,7 @@ class WalletServiceTest {
         user = new User();
         wallet = new Wallet(user);
         assetRequest = new WalletAssetRequest(BTC, new BigDecimal("1.5"),
-                new BigDecimal("45.33"), LocalDateTime.now());
+                new BigDecimal("45.33"), LocalDateTime.now(ZoneOffset.UTC));
 
     }
 
