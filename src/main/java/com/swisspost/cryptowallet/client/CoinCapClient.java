@@ -19,14 +19,15 @@ public class CoinCapClient {
     @Value("${coincap.api.key}")
     private String apiKey;
 
-    private RestClient restClient;
+    private final RestClient restClient;
 
     private static final Logger log = LoggerFactory.getLogger(CoinCapClient.class);
 
-    @PostConstruct
-    private void initRestClient() {
+    public CoinCapClient(RestClient.Builder restClientBuilder,
+                         @Value("${coincap.api.baseUrl}") String baseUrl,
+                         @Value("${coincap.api.key}") String apiKey) {
         log.info("Initializing CoinCap client...");
-        restClient = RestClient.builder()
+        this.restClient = restClientBuilder
                 .baseUrl(baseUrl)
                 .defaultHeader("Authorization", "Bearer " + apiKey)
                 .build();
