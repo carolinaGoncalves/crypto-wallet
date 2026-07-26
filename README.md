@@ -170,6 +170,7 @@ to the appropriate HTTP status and I added a method to catch all the other excep
 
 ## Testing
 Unit tests cover the service layer: price retrieval/persistence, wallet valuation, wallet performance, and the scheduling logic (including failure handling and concurrency behavior).
+No integration tests were added, but the next step would be adding a few integration tests to verify the full flow. 
 
 ## Possible Improvements
 - Authentication and authorization
